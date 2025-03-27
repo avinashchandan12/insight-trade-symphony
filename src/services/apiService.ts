@@ -1,4 +1,3 @@
-
 // This file would contain the actual API integration code
 // For now, we'll create mock implementations
 
@@ -256,7 +255,10 @@ export const addTrade = async (trade: Omit<Trade, 'id'>): Promise<Trade> => {
 export const fetchWatchlist = async (timeFrame: string = 'daily'): Promise<StockData[]> => {
   await new Promise(resolve => setTimeout(resolve, 600));
   
-  if (timeFrame === 'daily') {
+  // For demonstration, logging the timeframe
+  console.log(`Fetching watchlist data for timeframe: ${timeFrame}`);
+  
+  if (timeFrame === 'daily' || !timeFrame) {
     return [...mockStockData];
   }
   

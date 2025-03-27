@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/tabs";
 import AppLayout from "@/components/layout/AppLayout";
 import StockWatchlist from "@/components/dashboard/StockWatchlist";
-import { fetchWatchlist } from "@/services/apiService";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,8 +17,19 @@ const Watchlist = () => {
   const [activeTimeFrame, setActiveTimeFrame] = useState("daily");
   
   const { data: stocks, isLoading } = useQuery({
-    queryKey: ["watchlist"],
-    queryFn: fetchWatchlist
+    queryKey: ["watchlist", activeTimeFrame],
+    queryFn: async () => {
+      const response = await fetch(`/api/watchlist?timeFrame=${activeTimeFrame}`);
+      // This is just a mock implementation since we're using the mock data
+      // In a real app, we would use the actual API
+      return new Promise(resolve => {
+        setTimeout(() => {
+          import('@/services/apiService').then(({ fetchWatchlist }) => {
+            fetchWatchlist(activeTimeFrame).then(resolve);
+          });
+        }, 600);
+      });
+    }
   });
 
   return (

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchWatchlist, StockData } from "@/services/apiService";
+import { StockData } from "@/services/apiService";
 import { ArrowUpIcon, ArrowDownIcon, Plus, Search, MoreHorizontal, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,18 @@ const StockWatchlist = () => {
   
   const { data: stocks, isLoading } = useQuery({
     queryKey: ["watchlist", timeFrame],
-    queryFn: fetchWatchlist
+    queryFn: async () => {
+      const response = await fetch(`/api/watchlist?timeFrame=${timeFrame}`);
+      // This is just a mock implementation since we're using the mock data
+      // In a real app, we would use the actual API
+      return new Promise<StockData[]>(resolve => {
+        setTimeout(() => {
+          import('@/services/apiService').then(({ fetchWatchlist }) => {
+            fetchWatchlist(timeFrame).then(resolve);
+          });
+        }, 600);
+      });
+    }
   });
   
   const filteredStocks = stocks?.filter(stock => 
