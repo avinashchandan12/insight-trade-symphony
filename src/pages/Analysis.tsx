@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/layout/AppLayout";
@@ -16,6 +15,7 @@ import {
   Calendar, Clock3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import StrategySignals from "@/components/analysis/StrategySignals";
 
 // Mock data
 const stockData = [
@@ -61,6 +61,7 @@ const timeframeOptions = [
 const Analysis = () => {
   const [timeframe, setTimeframe] = useState("1m");
   const [chartType, setChartType] = useState<'overview' | 'sectors' | 'comparison'>('overview');
+  const [analysisSectionActive, setAnalysisSectionActive] = useState("market");
   
   const { data: aiAnalysis, isLoading: isLoadingAI } = useQuery({
     queryKey: ["aiMarketAnalysis"],
@@ -101,354 +102,524 @@ const Analysis = () => {
           <p className="text-muted-foreground">AI-powered insights and market intelligence</p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="glass-panel p-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                <div className="flex items-center gap-3">
-                  <Tabs defaultValue="line" className="w-auto">
-                    <TabsList className="bg-secondary/60">
-                      <TabsTrigger value="line" onClick={() => setChartType('overview')} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <LineChartIcon className="h-4 w-4" />
-                      </TabsTrigger>
-                      <TabsTrigger value="bar" onClick={() => setChartType('sectors')} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <BarChart2 className="h-4 w-4" />
-                      </TabsTrigger>
-                      <TabsTrigger value="area" onClick={() => setChartType('comparison')} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <PieChart className="h-4 w-4" />
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                  <h2 className="font-semibold">
-                    {chartType === 'overview' ? 'Market Overview' : 
-                     chartType === 'sectors' ? 'Sector Performance' : 
-                     'Index Comparison'}
-                  </h2>
-                </div>
-                <div className="flex overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-                  {timeframeOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={timeframe === option.value ? "default" : "outline"}
-                      size="sm"
-                      className={cn(
-                        "rounded-full",
-                        timeframe !== option.value && "bg-secondary/40"
-                      )}
-                      onClick={() => setTimeframe(option.value)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="h-72">
-                {chartType === 'overview' && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={stockData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                        tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                      />
-                      <YAxis 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                        tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend 
-                        wrapperStyle={{ marginTop: 10 }}
-                        formatter={(value) => <span className="text-muted-foreground uppercase text-xs">{value}</span>}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="spy" 
-                        stroke="hsl(var(--primary))" 
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="qqq" 
-                        stroke="#818cf8" 
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 6, fill: '#818cf8' }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="dia" 
-                        stroke="#f472b6" 
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 6, fill: '#f472b6' }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-                
-                {chartType === 'sectors' && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={sectorData} layout="vertical" margin={{ top: 10, right: 10, left: 80, bottom: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" horizontal={true} vertical={false} />
-                      <XAxis 
-                        type="number" 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                        tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                      />
-                      <YAxis 
-                        type="category"
-                        dataKey="name" 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                        tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar 
-                        dataKey="value" 
-                        fill="hsl(var(--primary))" 
-                        radius={[0, 4, 4, 0]}
-                        background={{ fill: 'rgba(255,255,255,0.05)' }}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-                
-                {chartType === 'comparison' && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={stockData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                      <defs>
-                        <linearGradient id="colorSpy" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="colorQqq" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="colorDia" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f472b6" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#f472b6" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                        tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                      />
-                      <YAxis 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                        tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend 
-                        wrapperStyle={{ marginTop: 10 }}
-                        formatter={(value) => <span className="text-muted-foreground uppercase text-xs">{value}</span>}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="spy" 
-                        stroke="hsl(var(--primary))" 
-                        fillOpacity={1}
-                        fill="url(#colorSpy)" 
-                        strokeWidth={2}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="qqq" 
-                        stroke="#818cf8" 
-                        fillOpacity={1}
-                        fill="url(#colorQqq)" 
-                        strokeWidth={2}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="dia" 
-                        stroke="#f472b6" 
-                        fillOpacity={1}
-                        fill="url(#colorDia)" 
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </div>
-            
-            {/* Market Indicators Panel */}
-            <div className="glass-panel p-5">
-              <h2 className="font-semibold mb-4">Market Indicators</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <IndicatorCard 
-                  name="VIX Volatility"
-                  value="18.42"
-                  change="-2.15%"
-                  status="green"
-                  description="30-day expected volatility of the S&P 500"
-                />
-                <IndicatorCard 
-                  name="10Y Treasury"
-                  value="4.21%"
-                  change="+0.05%"
-                  status="red"
-                  description="10-year U.S. treasury yield"
-                />
-                <IndicatorCard 
-                  name="USD Index"
-                  value="104.25"
-                  change="+0.32%"
-                  status="red"
-                  description="Measure of USD vs basket of currencies"
-                />
-                <IndicatorCard 
-                  name="Gold"
-                  value="$1,932.50"
-                  change="+1.2%"
-                  status="green"
-                  description="Gold spot price per troy ounce"
-                />
-                <IndicatorCard 
-                  name="WTI Crude"
-                  value="$78.65"
-                  change="-0.8%"
-                  status="red"
-                  description="West Texas Intermediate crude oil price"
-                />
-                <IndicatorCard 
-                  name="S&P 500 P/E"
-                  value="21.4"
-                  change="-0.2"
-                  status="neutral"
-                  description="Price to earnings ratio of the S&P 500"
-                />
-              </div>
-            </div>
-          </div>
+        <Tabs defaultValue="marketData" className="mb-6">
+          <TabsList className="mb-6">
+            <TabsTrigger value="marketData" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Market Data
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Strategy Signals
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-6">
-            <div className="glass-panel p-5">
-              <div className="flex items-center mb-4">
-                <div className="mr-3 p-2 rounded-lg bg-primary/20">
-                  <Sparkles className="h-5 w-5 text-primary" />
+          <TabsContent value="marketData">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="glass-panel p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                    <div className="flex items-center gap-3">
+                      <Tabs defaultValue="line" className="w-auto">
+                        <TabsList className="bg-secondary/60">
+                          <TabsTrigger value="line" onClick={() => setChartType('overview')} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                            <LineChartIcon className="h-4 w-4" />
+                          </TabsTrigger>
+                          <TabsTrigger value="bar" onClick={() => setChartType('sectors')} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                            <BarChart2 className="h-4 w-4" />
+                          </TabsTrigger>
+                          <TabsTrigger value="area" onClick={() => setChartType('comparison')} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                            <PieChart className="h-4 w-4" />
+                          </TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                      <h2 className="font-semibold">
+                        {chartType === 'overview' ? 'Market Overview' : 
+                         chartType === 'sectors' ? 'Sector Performance' : 
+                         'Index Comparison'}
+                      </h2>
+                    </div>
+                    <div className="flex overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+                      {timeframeOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant={timeframe === option.value ? "default" : "outline"}
+                          size="sm"
+                          className={cn(
+                            "rounded-full",
+                            timeframe !== option.value && "bg-secondary/40"
+                          )}
+                          onClick={() => setTimeframe(option.value)}
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="h-72">
+                    {chartType === 'overview' && (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={stockData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                          />
+                          <YAxis 
+                            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend 
+                            wrapperStyle={{ marginTop: 10 }}
+                            formatter={(value) => <span className="text-muted-foreground uppercase text-xs">{value}</span>}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="spy" 
+                            stroke="hsl(var(--primary))" 
+                            strokeWidth={2}
+                            dot={false}
+                            activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="qqq" 
+                            stroke="#818cf8" 
+                            strokeWidth={2}
+                            dot={false}
+                            activeDot={{ r: 6, fill: '#818cf8' }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="dia" 
+                            stroke="#f472b6" 
+                            strokeWidth={2}
+                            dot={false}
+                            activeDot={{ r: 6, fill: '#f472b6' }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
+                    
+                    {chartType === 'sectors' && (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={sectorData} layout="vertical" margin={{ top: 10, right: 10, left: 80, bottom: 10 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" horizontal={true} vertical={false} />
+                          <XAxis 
+                            type="number" 
+                            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                          />
+                          <YAxis 
+                            type="category"
+                            dataKey="name" 
+                            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar 
+                            dataKey="value" 
+                            fill="hsl(var(--primary))" 
+                            radius={[0, 4, 4, 0]}
+                            background={{ fill: 'rgba(255,255,255,0.05)' }}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                    
+                    {chartType === 'comparison' && (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={stockData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                          <defs>
+                            <linearGradient id="colorSpy" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="colorQqq" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="colorDia" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#f472b6" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#f472b6" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                          />
+                          <YAxis 
+                            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend 
+                            wrapperStyle={{ marginTop: 10 }}
+                            formatter={(value) => <span className="text-muted-foreground uppercase text-xs">{value}</span>}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="spy" 
+                            stroke="hsl(var(--primary))" 
+                            fillOpacity={1}
+                            fill="url(#colorSpy)" 
+                            strokeWidth={2}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="qqq" 
+                            stroke="#818cf8" 
+                            fillOpacity={1}
+                            fill="url(#colorQqq)" 
+                            strokeWidth={2}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="dia" 
+                            stroke="#f472b6" 
+                            fillOpacity={1}
+                            fill="url(#colorDia)" 
+                            strokeWidth={2}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold">AI Market Analysis</h2>
-                  <div className="flex items-center text-muted-foreground text-sm gap-2">
-                    <Clock3 className="h-3.5 w-3.5" />
-                    <span>Updated {timeframe === '1d' ? 'just now' : '3 hours ago'}</span>
+                
+                {/* Market Indicators Panel */}
+                <div className="glass-panel p-5">
+                  <h2 className="font-semibold mb-4">Market Indicators</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <IndicatorCard 
+                      name="VIX Volatility"
+                      value="18.42"
+                      change="-2.15%"
+                      status="green"
+                      description="30-day expected volatility of the S&P 500"
+                    />
+                    <IndicatorCard 
+                      name="10Y Treasury"
+                      value="4.21%"
+                      change="+0.05%"
+                      status="red"
+                      description="10-year U.S. treasury yield"
+                    />
+                    <IndicatorCard 
+                      name="USD Index"
+                      value="104.25"
+                      change="+0.32%"
+                      status="red"
+                      description="Measure of USD vs basket of currencies"
+                    />
+                    <IndicatorCard 
+                      name="Gold"
+                      value="$1,932.50"
+                      change="+1.2%"
+                      status="green"
+                      description="Gold spot price per troy ounce"
+                    />
+                    <IndicatorCard 
+                      name="WTI Crude"
+                      value="$78.65"
+                      change="-0.8%"
+                      status="red"
+                      description="West Texas Intermediate crude oil price"
+                    />
+                    <IndicatorCard 
+                      name="S&P 500 P/E"
+                      value="21.4"
+                      change="-0.2"
+                      status="neutral"
+                      description="Price to earnings ratio of the S&P 500"
+                    />
                   </div>
                 </div>
               </div>
               
-              {isLoadingAI ? (
-                <div className="h-48 flex items-center justify-center">
-                  <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={cn(
-                      "px-3 py-1.5 rounded-lg flex items-center text-sm font-medium",
-                      aiAnalysis?.sentiment === 'bullish' ? "bg-success/20 text-success" :
-                      aiAnalysis?.sentiment === 'bearish' ? "bg-destructive/20 text-destructive" :
-                      "bg-warning/20 text-warning"
-                    )}>
-                      {aiAnalysis?.sentiment === 'bullish' ? (
-                        <TrendingUp className="h-4 w-4 mr-1.5" />
-                      ) : aiAnalysis?.sentiment === 'bearish' ? (
-                        <TrendingDown className="h-4 w-4 mr-1.5" />
-                      ) : (
-                        <Workflow className="h-4 w-4 mr-1.5" />
+              <div className="space-y-6">
+                <div className="glass-panel p-5">
+                  <div className="flex items-center mb-4">
+                    <div className="mr-3 p-2 rounded-lg bg-primary/20">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold">AI Market Analysis</h2>
+                      <div className="flex items-center text-muted-foreground text-sm gap-2">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        <span>Updated {timeframe === '1d' ? 'just now' : '3 hours ago'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {isLoadingAI ? (
+                    <div className="h-48 flex items-center justify-center">
+                      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={cn(
+                          "px-3 py-1.5 rounded-lg flex items-center text-sm font-medium",
+                          aiAnalysis?.sentiment === 'bullish' ? "bg-success/20 text-success" :
+                          aiAnalysis?.sentiment === 'bearish' ? "bg-destructive/20 text-destructive" :
+                          "bg-warning/20 text-warning"
+                        )}>
+                          {aiAnalysis?.sentiment === 'bullish' ? (
+                            <TrendingUp className="h-4 w-4 mr-1.5" />
+                          ) : aiAnalysis?.sentiment === 'bearish' ? (
+                            <TrendingDown className="h-4 w-4 mr-1.5" />
+                          ) : (
+                            <Workflow className="h-4 w-4 mr-1.5" />
+                          )}
+                          <span className="capitalize">{aiAnalysis?.sentiment}</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Confidence: <span className="text-foreground font-medium">{(aiAnalysis?.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm leading-relaxed">
+                        {aiAnalysis?.analysis}
+                      </p>
+                      
+                      <div className="pt-2">
+                        <h3 className="text-sm font-medium mb-2">Key Points</h3>
+                        <ul className="space-y-1.5">
+                          {aiAnalysis?.keyPoints.map((point, index) => (
+                            <li key={index} className="flex items-start text-sm">
+                              <span className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2.5 flex-shrink-0 mt-0.5">
+                                {index + 1}
+                              </span>
+                              <span>{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      {aiAnalysis?.recommendations && (
+                        <div className="pt-2">
+                          <h3 className="text-sm font-medium mb-2">Recommendations</h3>
+                          <ul className="space-y-1.5">
+                            {aiAnalysis.recommendations.map((rec, index) => (
+                              <li key={index} className="flex items-start text-sm">
+                                <span className="text-primary mr-2.5">•</span>
+                                <span>{rec}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
-                      <span className="capitalize">{aiAnalysis?.sentiment}</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Confidence: <span className="text-foreground font-medium">{(aiAnalysis?.confidence * 100).toFixed(0)}%</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm leading-relaxed">
-                    {aiAnalysis?.analysis}
-                  </p>
-                  
-                  <div className="pt-2">
-                    <h3 className="text-sm font-medium mb-2">Key Points</h3>
-                    <ul className="space-y-1.5">
-                      {aiAnalysis?.keyPoints.map((point, index) => (
-                        <li key={index} className="flex items-start text-sm">
-                          <span className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2.5 flex-shrink-0 mt-0.5">
-                            {index + 1}
-                          </span>
-                          <span>{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  {aiAnalysis?.recommendations && (
-                    <div className="pt-2">
-                      <h3 className="text-sm font-medium mb-2">Recommendations</h3>
-                      <ul className="space-y-1.5">
-                        {aiAnalysis.recommendations.map((rec, index) => (
-                          <li key={index} className="flex items-start text-sm">
-                            <span className="text-primary mr-2.5">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   )}
                 </div>
-              )}
+                
+                <div className="glass-panel p-5">
+                  <h2 className="font-semibold mb-4">Market Calendar</h2>
+                  <div className="space-y-3">
+                    <CalendarItem 
+                      date="Today"
+                      events={[
+                        { time: "8:30 AM", title: "CPI Report", importance: "high" },
+                        { time: "2:00 PM", title: "FOMC Minutes", importance: "high" }
+                      ]}
+                    />
+                    <CalendarItem 
+                      date="Tomorrow"
+                      events={[
+                        { time: "8:30 AM", title: "Jobless Claims", importance: "medium" },
+                        { time: "9:45 AM", title: "PMI Data", importance: "medium" },
+                        { time: "10:00 AM", title: "Housing Starts", importance: "low" }
+                      ]}
+                    />
+                    <CalendarItem 
+                      date="Friday, Dec 15"
+                      events={[
+                        { time: "8:30 AM", title: "Retail Sales", importance: "high" },
+                        { time: "9:15 AM", title: "Industrial Production", importance: "medium" }
+                      ]}
+                    />
+                  </div>
+                  
+                  <div className="divider" />
+                  
+                  <h3 className="font-medium text-sm mb-2">Earnings Calendar</h3>
+                  <div className="space-y-2">
+                    <EarningsItem company="ORCL" name="Oracle Corp" time="After Close" est="$1.32" />
+                    <EarningsItem company="ADBE" name="Adobe Inc" time="Tomorrow AMC" est="$4.05" />
+                    <EarningsItem company="COST" name="Costco Wholesale" time="Thursday AMC" est="$3.45" />
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="glass-panel p-5">
-              <h2 className="font-semibold mb-4">Market Calendar</h2>
-              <div className="space-y-3">
-                <CalendarItem 
-                  date="Today"
-                  events={[
-                    { time: "8:30 AM", title: "CPI Report", importance: "high" },
-                    { time: "2:00 PM", title: "FOMC Minutes", importance: "high" }
-                  ]}
-                />
-                <CalendarItem 
-                  date="Tomorrow"
-                  events={[
-                    { time: "8:30 AM", title: "Jobless Claims", importance: "medium" },
-                    { time: "9:45 AM", title: "PMI Data", importance: "medium" },
-                    { time: "10:00 AM", title: "Housing Starts", importance: "low" }
-                  ]}
-                />
-                <CalendarItem 
-                  date="Friday, Dec 15"
-                  events={[
-                    { time: "8:30 AM", title: "Retail Sales", importance: "high" },
-                    { time: "9:15 AM", title: "Industrial Production", importance: "medium" }
-                  ]}
-                />
+          </TabsContent>
+          
+          <TabsContent value="strategy">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <StrategySignals />
               </div>
               
-              <div className="divider" />
-              
-              <h3 className="font-medium text-sm mb-2">Earnings Calendar</h3>
-              <div className="space-y-2">
-                <EarningsItem company="ORCL" name="Oracle Corp" time="After Close" est="$1.32" />
-                <EarningsItem company="ADBE" name="Adobe Inc" time="Tomorrow AMC" est="$4.05" />
-                <EarningsItem company="COST" name="Costco Wholesale" time="Thursday AMC" est="$3.45" />
+              <div>
+                <Tabs defaultValue="market" onValueChange={setAnalysisSectionActive}>
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="market" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      Market
+                    </TabsTrigger>
+                    <TabsTrigger value="strategy" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      Strategy
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                
+                {analysisSectionActive === "market" ? (
+                  <div className="space-y-6">
+                    <div className="glass-panel p-5">
+                      <div className="flex items-center mb-4">
+                        <div className="mr-3 p-2 rounded-lg bg-primary/20">
+                          <Sparkles className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-semibold">AI Market Analysis</h2>
+                          <div className="flex items-center text-muted-foreground text-sm gap-2">
+                            <Clock3 className="h-3.5 w-3.5" />
+                            <span>Updated {timeframe === '1d' ? 'just now' : '3 hours ago'}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {isLoadingAI ? (
+                        <div className="h-48 flex items-center justify-center">
+                          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className={cn(
+                              "px-3 py-1.5 rounded-lg flex items-center text-sm font-medium",
+                              aiAnalysis?.sentiment === 'bullish' ? "bg-success/20 text-success" :
+                              aiAnalysis?.sentiment === 'bearish' ? "bg-destructive/20 text-destructive" :
+                              "bg-warning/20 text-warning"
+                            )}>
+                              {aiAnalysis?.sentiment === 'bullish' ? (
+                                <TrendingUp className="h-4 w-4 mr-1.5" />
+                              ) : aiAnalysis?.sentiment === 'bearish' ? (
+                                <TrendingDown className="h-4 w-4 mr-1.5" />
+                              ) : (
+                                <Workflow className="h-4 w-4 mr-1.5" />
+                              )}
+                              <span className="capitalize">{aiAnalysis?.sentiment}</span>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Confidence: <span className="text-foreground font-medium">{(aiAnalysis?.confidence * 100).toFixed(0)}%</span>
+                            </div>
+                          </div>
+                          
+                          <p className="text-sm leading-relaxed">
+                            {aiAnalysis?.analysis}
+                          </p>
+                          
+                          <div className="pt-2">
+                            <h3 className="text-sm font-medium mb-2">Key Points</h3>
+                            <ul className="space-y-1.5">
+                              {aiAnalysis?.keyPoints.map((point, index) => (
+                                <li key={index} className="flex items-start text-sm">
+                                  <span className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2.5 flex-shrink-0 mt-0.5">
+                                    {index + 1}
+                                  </span>
+                                  <span>{point}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          {aiAnalysis?.recommendations && (
+                            <div className="pt-2">
+                              <h3 className="text-sm font-medium mb-2">Recommendations</h3>
+                              <ul className="space-y-1.5">
+                                {aiAnalysis.recommendations.map((rec, index) => (
+                                  <li key={index} className="flex items-start text-sm">
+                                    <span className="text-primary mr-2.5">•</span>
+                                    <span>{rec}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="glass-panel p-5">
+                      <div className="flex items-center mb-4">
+                        <div className="mr-3 p-2 rounded-lg bg-primary/20">
+                          <Sparkles className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-semibold">Strategy Performance</h2>
+                          <p className="text-muted-foreground text-sm">Analysis of your trading strategy</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="bg-secondary/40 p-3 rounded-lg">
+                          <h3 className="text-sm font-medium mb-2">Performance Metrics</h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-background/60 p-2 rounded">
+                              <p className="text-xs text-muted-foreground">Win Rate</p>
+                              <p className="text-lg font-semibold">62%</p>
+                            </div>
+                            <div className="bg-background/60 p-2 rounded">
+                              <p className="text-xs text-muted-foreground">Avg Return</p>
+                              <p className="text-lg font-semibold">+4.8%</p>
+                            </div>
+                            <div className="bg-background/60 p-2 rounded">
+                              <p className="text-xs text-muted-foreground">Holding Period</p>
+                              <p className="text-lg font-semibold">14 days</p>
+                            </div>
+                            <div className="bg-background/60 p-2 rounded">
+                              <p className="text-xs text-muted-foreground">Max Drawdown</p>
+                              <p className="text-lg font-semibold">-6.2%</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-sm font-medium mb-2">Improvement Suggestions</h3>
+                          <ul className="space-y-2">
+                            <li className="text-sm flex items-start">
+                              <span className="text-primary mr-2">•</span>
+                              <span>Add volume filters to avoid low liquidity stocks</span>
+                            </li>
+                            <li className="text-sm flex items-start">
+                              <span className="text-primary mr-2">•</span>
+                              <span>Consider tighter stop-loss during high volatility</span>
+                            </li>
+                            <li className="text-sm flex items-start">
+                              <span className="text-primary mr-2">•</span>
+                              <span>Implement sector exposure limits (max 20%)</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

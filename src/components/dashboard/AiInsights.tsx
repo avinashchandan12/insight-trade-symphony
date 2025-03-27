@@ -4,10 +4,15 @@ import { getAIAnalysis } from "@/services/aiService";
 import { Sparkles, TrendingUp, TrendingDown, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const AiInsights = () => {
+interface AiInsightsProps {
+  type?: 'market' | 'stock' | 'strategy';
+  timeframe?: string;
+}
+
+const AiInsights = ({ type = 'market', timeframe }: AiInsightsProps) => {
   const { data: aiData, isLoading } = useQuery({
-    queryKey: ["aiMarketAnalysis"],
-    queryFn: () => getAIAnalysis({ type: 'market' })
+    queryKey: ["aiAnalysis", type, timeframe],
+    queryFn: () => getAIAnalysis({ type, timeframe })
   });
   
   return (
@@ -17,8 +22,16 @@ const AiInsights = () => {
           <Sparkles className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">AI Market Insights</h2>
-          <p className="text-muted-foreground text-sm">Smart analysis of current market conditions</p>
+          <h2 className="text-lg font-semibold">
+            {type === 'market' ? 'AI Market Insights' : 
+             type === 'stock' ? 'AI Stock Analysis' : 
+             'AI Strategy Insights'}
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            {type === 'market' ? 'Smart analysis of current market conditions' :
+             type === 'stock' ? 'Deep analysis of selected stocks' :
+             'Intelligent evaluation of your trading strategy'}
+          </p>
         </div>
       </div>
       
