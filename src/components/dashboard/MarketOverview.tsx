@@ -113,9 +113,10 @@ const MarketOverview = () => {
                   type="monotone" 
                   dataKey="value" 
                   stroke="#0FA0CE" 
-                  fillOpacity={1} 
+                  fillOpacity={0.2}
                   fill="url(#colorValue)" 
                   strokeWidth={2}
+                  className="dark:chart-area"
                 />
               </AreaChart>
             </ChartContainer>

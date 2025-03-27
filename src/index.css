@@ -229,6 +229,6 @@
   }
   
   .dark .chart-area {
-    @apply fill-[#0FA0CE] fill-opacity-20;
+    @apply fill-[#0FA0CE] opacity-20;
   }
 }
