@@ -6,30 +6,17 @@ import { ArrowUpIcon, ArrowDownIcon, Plus, Search, MoreHorizontal, Clock } from 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-const timeFrames = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-];
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const StockWatchlist = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("");
   const [timeFrame, setTimeFrame] = useState("daily");
   
   const { data: stocks, isLoading } = useQuery({
     queryKey: ["watchlist", timeFrame],
     queryFn: async () => {
-      const response = await fetch(`/api/watchlist?timeFrame=${timeFrame}`);
-      // This is just a mock implementation since we're using the mock data
-      // In a real app, we would use the actual API
+      // In a real app, this would call the Upstox API
+      // For now, we're using mock data with a simulated API call
       return new Promise<StockData[]>(resolve => {
         setTimeout(() => {
           import('@/services/apiService').then(({ fetchWatchlist }) => {
@@ -41,113 +28,120 @@ const StockWatchlist = () => {
   });
   
   const filteredStocks = stocks?.filter(stock => 
-    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    stock.name.toLowerCase().includes(searchQuery.toLowerCase())
+    stock.symbol.toLowerCase().includes(filter.toLowerCase()) || 
+    stock.name.toLowerCase().includes(filter.toLowerCase())
   );
-  
+
   return (
-    <div className="glass-panel p-5">
+    <div className="glass-panel p-4 md:p-5">
       <div className="flex justify-between items-center mb-4">
-        <div>
-          <h2 className="text-lg font-semibold mb-1">Watchlist</h2>
-          <p className="text-muted-foreground text-sm">Track your favorite stocks</p>
-        </div>
-        <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" className="gap-1.5">
-                <Clock className="h-4 w-4" />
-                <span className="capitalize">{timeFrame}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {timeFrames.map((frame) => (
-                <DropdownMenuItem 
-                  key={frame.value}
-                  onClick={() => setTimeFrame(frame.value)}
-                  className={cn(
-                    "capitalize",
-                    timeFrame === frame.value && "bg-primary/10 font-medium"
-                  )}
-                >
-                  {frame.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <Button size="sm" variant="secondary" className="gap-1.5">
-            <Plus className="h-4 w-4" />
-            <span>Add</span>
-          </Button>
-        </div>
+        <h2 className="text-lg font-semibold">Watchlist</h2>
+        <Button variant="ghost" size="icon">
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
       
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search symbols or companies"
-          className="pl-9 bg-secondary/40"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search stocks..."
+            className="pl-9"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
+        
+        <Tabs defaultValue="daily" className="w-full">
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger 
+              value="daily" 
+              onClick={() => setTimeFrame("daily")}
+            >
+              Daily
+            </TabsTrigger>
+            <TabsTrigger 
+              value="weekly" 
+              onClick={() => setTimeFrame("weekly")}
+            >
+              Weekly
+            </TabsTrigger>
+            <TabsTrigger 
+              value="monthly" 
+              onClick={() => setTimeFrame("monthly")}
+            >
+              Monthly
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
-      {isLoading ? (
-        <div className="h-48 flex items-center justify-center">
-          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-        </div>
-      ) : (
-        <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin">
-          {filteredStocks?.map((stock) => (
-            <StockItem key={stock.symbol} stock={stock} timeFrame={timeFrame} />
-          ))}
-          
-          {filteredStocks?.length === 0 && (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">No stocks found</p>
+      <div className="mt-4 space-y-1 max-h-[350px] overflow-y-auto pr-1">
+        {isLoading ? (
+          Array(6).fill(0).map((_, i) => (
+            <div key={i} className="animate-pulse flex p-2.5 rounded-lg">
+              <div className="flex-1">
+                <div className="h-4 bg-muted rounded w-16 mb-2"></div>
+                <div className="h-3 bg-muted/60 rounded w-24"></div>
+              </div>
+              <div className="text-right">
+                <div className="h-4 bg-muted rounded w-14 mb-2 ml-auto"></div>
+                <div className="h-3 bg-muted/60 rounded w-10 ml-auto"></div>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          ))
+        ) : (
+          filteredStocks?.length ? (
+            filteredStocks.map((stock) => (
+              <WatchlistItem key={stock.symbol} stock={stock} />
+            ))
+          ) : (
+            <div className="text-center py-4 text-muted-foreground">
+              {filter ? "No matching stocks found" : "Your watchlist is empty"}
+            </div>
+          )
+        )}
+      </div>
+      
+      <div className="text-xs text-muted-foreground flex items-center justify-center gap-1.5 mt-4 pt-3 border-t border-border/50">
+        <Clock className="h-3 w-3" />
+        <span>Last updated: 16:00 IST</span>
+      </div>
     </div>
   );
 };
 
-const StockItem = ({ stock, timeFrame }: { stock: StockData, timeFrame: string }) => {
+const WatchlistItem = ({ stock }: { stock: StockData }) => {
   const isPositive = stock.changePercent >= 0;
   
   return (
-    <div className="flex items-center justify-between p-3 hover:bg-secondary/40 rounded-lg transition-colors">
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-lg bg-secondary/80 flex items-center justify-center">
-          <span className="font-semibold text-sm">{stock.symbol.slice(0, 2)}</span>
-        </div>
-        <div>
-          <h3 className="font-medium text-sm">{stock.symbol}</h3>
-          <p className="text-xs text-muted-foreground">{stock.name}</p>
-        </div>
+    <div className="flex justify-between items-center p-2.5 hover:bg-secondary/40 rounded-lg transition-colors cursor-pointer group">
+      <div>
+        <p className="font-medium flex items-center gap-1.5">
+          {stock.symbol}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
+        </p>
+        <p className="text-xs text-muted-foreground">{stock.name}</p>
       </div>
-      
-      <div className="flex items-center space-x-4">
-        <div className="text-right">
-          <p className="font-semibold">₹{stock.price.toFixed(2)}</p>
-          <div className={cn(
-            "flex items-center justify-end text-xs",
-            isPositive ? "text-success" : "text-destructive"
-          )}>
-            {isPositive ? (
-              <ArrowUpIcon className="h-3 w-3 mr-1" />
-            ) : (
-              <ArrowDownIcon className="h-3 w-3 mr-1" />
-            )}
-            <span>{Math.abs(stock.changePercent).toFixed(2)}%</span>
-            <span className="ml-1 text-xs text-muted-foreground">{timeFrame}</span>
-          </div>
-        </div>
-        <button className="text-muted-foreground hover:text-foreground">
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
+      <div className="text-right">
+        <p className="font-medium">₹{stock.price.toFixed(2)}</p>
+        <p className={cn(
+          "text-xs flex items-center gap-0.5 justify-end",
+          isPositive ? "text-success" : "text-destructive"
+        )}>
+          {isPositive ? (
+            <ArrowUpIcon className="h-3 w-3" />
+          ) : (
+            <ArrowDownIcon className="h-3 w-3" />
+          )}
+          {isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%
+        </p>
       </div>
     </div>
   );

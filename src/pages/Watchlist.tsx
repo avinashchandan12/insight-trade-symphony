@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { StockData } from "@/services/apiService";
 import {
   Tabs,
   TabsContent,
@@ -19,10 +20,11 @@ const Watchlist = () => {
   const { data: stocks, isLoading } = useQuery({
     queryKey: ["watchlist", activeTimeFrame],
     queryFn: async () => {
+      // In a real app, this would call the Upstox API
       const response = await fetch(`/api/watchlist?timeFrame=${activeTimeFrame}`);
+      
       // This is just a mock implementation since we're using the mock data
-      // In a real app, we would use the actual API
-      return new Promise(resolve => {
+      return new Promise<StockData[]>(resolve => {
         setTimeout(() => {
           import('@/services/apiService').then(({ fetchWatchlist }) => {
             fetchWatchlist(activeTimeFrame).then(resolve);
@@ -34,25 +36,25 @@ const Watchlist = () => {
 
   return (
     <AppLayout>
-      <div className="py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-display font-bold mb-1">Watchlist</h1>
+            <h1 className="text-2xl md:text-3xl font-display font-bold mb-1">Watchlist</h1>
             <p className="text-muted-foreground">Monitor your favorite stocks and market movers</p>
           </div>
-          <Button className="gap-1.5">
+          <Button className="gap-1.5 self-start sm:self-auto">
             <Plus className="h-4 w-4" />
             <span>Add Stocks</span>
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="glass-panel p-5">
-              <div className="flex justify-between items-center mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
+            <div className="glass-panel p-4 md:p-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <h2 className="text-lg font-semibold">Market Performance</h2>
-                <Tabs defaultValue="daily" className="w-auto">
-                  <TabsList>
+                <Tabs defaultValue="daily" className="w-full sm:w-auto">
+                  <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:flex">
                     <TabsTrigger value="daily" onClick={() => setActiveTimeFrame("daily")}>
                       Daily
                     </TabsTrigger>
@@ -69,15 +71,15 @@ const Watchlist = () => {
                 </Tabs>
               </div>
               
-              <div className="h-[300px]">
+              <div className="min-h-[300px]">
                 {isLoading ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {Array(6).fill(0).map((_, i) => (
                       <Skeleton key={i} className="h-20" />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {stocks?.map((stock) => (
                       <div 
                         key={stock.symbol} 
@@ -103,7 +105,7 @@ const Watchlist = () => {
               </div>
             </div>
             
-            <div className="glass-panel p-5">
+            <div className="glass-panel p-4 md:p-5">
               <h2 className="text-lg font-semibold mb-4">Historical Performance</h2>
               <div className="h-[300px] flex items-center justify-center bg-secondary/40 rounded-lg">
                 <p className="text-muted-foreground">Stock chart for {activeTimeFrame} view will appear here</p>
