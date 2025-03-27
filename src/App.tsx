@@ -13,6 +13,8 @@ import Strategy from "./pages/Strategy";
 import Journal from "./pages/Journal";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Watchlist from "./pages/Watchlist";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -28,8 +30,10 @@ const App = () => (
             <Route path="/trades" element={<Trades />} />
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/strategy" element={<Strategy />} />
+            <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -17,9 +17,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/layout/Logo";
-import { IndianMarketIcon } from "@/assets/icons/IndianMarket";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, BookText, Home, LineChart, Settings, ChevronRight, ShieldCheck } from "lucide-react";
+import { BarChart3, BookText, Home, LineChart, Settings, ShieldCheck, ListChecks, User } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -27,6 +28,7 @@ interface AppLayoutProps {
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: Home },
+  { name: "Watchlist", path: "/watchlist", icon: ListChecks },
   { name: "Trades", path: "/trades", icon: BarChart3 },
   { name: "Analysis", path: "/analysis", icon: LineChart },
   { name: "Strategy", path: "/strategy", icon: ShieldCheck },
@@ -43,8 +45,13 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     return (
       <div className="flex h-full pattern-rangoli">
         <main className="flex-1 h-full overflow-y-auto pb-20 px-4 md:px-8 relative">
-          <div className="absolute top-4 right-4 z-50">
+          <div className="sticky top-0 z-50 py-3 flex justify-end items-center gap-2 bg-background/80 backdrop-blur-md">
             <ThemeToggle />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/auth">
+                <User className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
           {children}
         </main>
@@ -71,9 +78,14 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <div className="flex h-full pattern-rangoli">
         <DesktopSidebar />
         <main className="flex-1 h-full overflow-y-auto pb-8 px-4 md:px-8 relative">
-          <div className="flex justify-end items-center p-4">
+          <div className="sticky top-0 z-50 py-3 flex justify-end items-center gap-2 bg-background/80 backdrop-blur-md">
             <ThemeToggle />
             <SidebarTrigger className="ml-2" />
+            <Avatar className="ml-2 cursor-pointer">
+              <AvatarFallback>
+                <Link to="/auth">U</Link>
+              </AvatarFallback>
+            </Avatar>
           </div>
           {children}
         </main>

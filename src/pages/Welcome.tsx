@@ -57,6 +57,19 @@ const Welcome = () => {
         <div className="absolute bottom-1/4 left-1/4 transform translate-y-1/2 -translate-x-1/2">
           <DiwaaliPatternIcon className="w-40 h-40 text-accent opacity-20" />
         </div>
+        
+        {/* Floating decorative elements for Indian flair */}
+        <img 
+          src="/lovable-uploads/8fa0ae92-11fa-42a1-b178-0ec45bd40676.png" 
+          alt="Decorative" 
+          className="absolute top-[20%] left-[10%] h-16 w-16 opacity-20 animate-pulse"
+        />
+        <img 
+          src="/lovable-uploads/f1192a28-e293-49b1-90b7-ed41cbd914f6.png" 
+          alt="Decorative" 
+          className="absolute bottom-[15%] right-[15%] h-20 w-20 opacity-20 animate-pulse"
+        />
+        
         {Array.from({ length: 50 }).map((_, i) => (
           <div 
             key={i}
@@ -113,13 +126,20 @@ const Welcome = () => {
             </p>
           </div>
         ) : (
-          <div className="animate-scale-in">
+          <div className="animate-scale-in flex flex-col items-center gap-4">
             <Button 
               onClick={handleEnter} 
               className="px-8 py-6 rounded-xl text-lg font-medium transition-all duration-300 gradient-primary hover:opacity-90 text-white"
             >
               Enter Dashboard
               <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button
+              onClick={() => navigate("/auth")}
+              variant="outline"
+              className="px-8 py-6 rounded-xl text-lg font-medium transition-all"
+            >
+              Login / Register
             </Button>
           </div>
         )}
