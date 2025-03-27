@@ -130,7 +130,7 @@ const StrategySignals = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="index" className="mt-6" onValueChange={setActiveTab}>
+      <Tabs defaultValue="index" className="mt-4" onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 mb-6">
           <TabsTrigger value="index" className="rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             Analyze Index

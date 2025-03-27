@@ -5,6 +5,7 @@ import { getAIAnalysis } from "@/services/aiService";
 import { fetchMarketSummary } from "@/services/apiService";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -12,10 +13,12 @@ import {
 import { 
   Sparkles, TrendingUp, TrendingDown, Workflow, 
   BarChart2, LineChart as LineChartIcon, PieChart, 
-  Calendar, Clock3
+  Calendar, Clock3, ArrowUpCircle, ArrowDownCircle, 
+  SplitSquareHorizontal, Brain, Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import StrategySignals from "@/components/analysis/StrategySignals";
+import AiInsights from "@/components/dashboard/AiInsights";
 
 // Mock data
 const stockData = [
@@ -58,15 +61,37 @@ const timeframeOptions = [
   { label: "All", value: "all" }
 ];
 
+const strategies = [
+  { name: "Mean Reversion Strategy", active: true },
+  { name: "Momentum Strategy", active: false },
+];
+
+const buySignals = [
+  { symbol: "LT", name: "Larsen & Toubro", price: 2340.6, changePercent: -8.76, period: "weekly" },
+  { symbol: "ICICI", name: "ICICI Bank", price: 1020.4, changePercent: -8.9, period: "monthly" },
+  { symbol: "ITC", name: "ITC Limited", price: 380.25, changePercent: -12.34, period: "monthly" },
+  { symbol: "HDFC", name: "HDFC Bank", price: 1495.6, changePercent: -7.12, period: "monthly" }
+];
+
+const topGainers = [
+  { symbol: "MARUTI", name: "Maruti Suzuki", price: 10450.75, changePercent: 9.87 },
+  { symbol: "WIPRO", name: "Wipro Ltd", price: 450.75, changePercent: 8.45 },
+  { symbol: "SBIN", name: "State Bank of India", price: 620.3, changePercent: 7.23 },
+  { symbol: "INFY", name: "Infosys", price: 1580.25, changePercent: 6.78 }
+];
+
+const topLosers = [
+  { symbol: "LT", name: "Larsen & Toubro", price: 2340.6, changePercent: -8.76 },
+  { symbol: "ITC", name: "ITC Limited", price: 380.25, changePercent: -7.89 },
+  { symbol: "ICICI", name: "ICICI Bank", price: 1020.4, changePercent: -5.23 },
+  { symbol: "HDFC", name: "HDFC Bank", price: 1495.6, changePercent: -3.72 }
+];
+
 const Analysis = () => {
   const [timeframe, setTimeframe] = useState("1m");
   const [chartType, setChartType] = useState<'overview' | 'sectors' | 'comparison'>('overview');
   const [analysisSectionActive, setAnalysisSectionActive] = useState("market");
-  
-  const { data: aiAnalysis, isLoading: isLoadingAI } = useQuery({
-    queryKey: ["aiMarketAnalysis"],
-    queryFn: () => getAIAnalysis({ type: 'market', timeframe })
-  });
+  const [selectedTab, setSelectedTab] = useState("tradingStrategies");
   
   const { data: marketData } = useQuery({
     queryKey: ["marketSummary"],
@@ -97,20 +122,183 @@ const Analysis = () => {
   return (
     <AppLayout>
       <div className="py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-display font-bold mb-1">Market Analysis</h1>
-          <p className="text-muted-foreground">AI-powered insights and market intelligence</p>
+        <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <div>
+            <h1 className="text-3xl font-display font-bold mb-1">Trading Strategies</h1>
+            <p className="text-muted-foreground">AI-powered insights and market intelligence</p>
+          </div>
+          <div className="flex space-x-2 mt-4 sm:mt-0">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <SplitSquareHorizontal className="h-4 w-4" />
+              Split View
+            </Button>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              AI View
+            </Button>
+            <Button variant="default" size="sm" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              New Strategy
+            </Button>
+          </div>
         </div>
         
-        <Tabs defaultValue="marketData" className="mb-6">
+        <Tabs defaultValue="tradingStrategies" value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
           <TabsList className="mb-6">
+            <TabsTrigger value="tradingStrategies" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Trading Strategies
+            </TabsTrigger>
             <TabsTrigger value="marketData" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Market Data
             </TabsTrigger>
-            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Strategy Signals
+            <TabsTrigger value="aiAnalysis" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              AI Analysis
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="tradingStrategies">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5 space-y-6">
+                <Card className="dark:bg-[#18191E]">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-xl font-semibold">My Strategies</CardTitle>
+                    <p className="text-sm text-muted-foreground">Select a strategy to edit or view</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {strategies.map((strategy, index) => (
+                      <Button 
+                        key={index}
+                        variant={strategy.active ? "default" : "outline"}
+                        className={cn(
+                          "w-full justify-start text-left h-auto py-3 px-4",
+                          strategy.active ? "bg-primary text-primary-foreground" : "bg-secondary/40"
+                        )}
+                      >
+                        {strategy.name}
+                      </Button>
+                    ))}
+                  </CardContent>
+                </Card>
+                
+                <Card className="dark:bg-[#18191E]">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-xl font-semibold">Market Opportunities</CardTitle>
+                    <p className="text-sm text-muted-foreground">Potential trades based on your strategies</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <Button 
+                        variant="outline" 
+                        className="bg-secondary/40 justify-center"
+                      >
+                        Buy Signals
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="bg-secondary/40 justify-center opacity-70"
+                      >
+                        Sell Signals
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3 max-h-[320px] overflow-y-auto">
+                      {buySignals.map((stock, index) => (
+                        <div key={index} className="flex items-center justify-between bg-background/40 p-3 rounded-lg">
+                          <div>
+                            <div className="font-medium">{stock.symbol}</div>
+                            <div className="text-sm text-muted-foreground">{stock.name}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-medium">₹{stock.price.toLocaleString()}</div>
+                            <div className="text-sm text-red-500">
+                              {stock.changePercent.toFixed(2)}% ({stock.period})
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="lg:col-span-7">
+                <StrategySignals />
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <Card className="dark:bg-[#18191E]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl font-semibold">Performance Threshold Alerts</CardTitle>
+                  <p className="text-sm text-muted-foreground">Stocks that have moved significantly</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {["Daily", "Weekly", "Monthly", "Yearly"].map((period, index) => (
+                      <Button 
+                        key={index} 
+                        variant={index === 0 ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          index !== 0 && "bg-secondary/40"
+                        )}
+                      >
+                        {period}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                    <div>
+                      <div className="flex items-center mb-4">
+                        <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
+                        <h3 className="font-semibold text-lg">Top Gainers</h3>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="grid grid-cols-12 gap-2 px-3 py-2 text-sm text-muted-foreground">
+                          <div className="col-span-2">Symbol</div>
+                          <div className="col-span-5">Name</div>
+                          <div className="col-span-3 text-right">Price</div>
+                          <div className="col-span-2 text-right">Change</div>
+                        </div>
+                        {topGainers.map((stock, index) => (
+                          <div key={index} className="grid grid-cols-12 gap-2 px-3 py-2 hover:bg-secondary/30 rounded-md">
+                            <div className="col-span-2 font-medium">{stock.symbol}</div>
+                            <div className="col-span-5">{stock.name}</div>
+                            <div className="col-span-3 text-right">₹{stock.price.toLocaleString()}</div>
+                            <div className="col-span-2 text-right text-green-500">+{stock.changePercent.toFixed(2)}%</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center mb-4">
+                        <TrendingDown className="h-5 w-5 text-red-500 mr-2" />
+                        <h3 className="font-semibold text-lg">Top Losers</h3>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="grid grid-cols-12 gap-2 px-3 py-2 text-sm text-muted-foreground">
+                          <div className="col-span-2">Symbol</div>
+                          <div className="col-span-5">Name</div>
+                          <div className="col-span-3 text-right">Price</div>
+                          <div className="col-span-2 text-right">Change</div>
+                        </div>
+                        {topLosers.map((stock, index) => (
+                          <div key={index} className="grid grid-cols-12 gap-2 px-3 py-2 hover:bg-secondary/30 rounded-md">
+                            <div className="col-span-2 font-medium">{stock.symbol}</div>
+                            <div className="col-span-5">{stock.name}</div>
+                            <div className="col-span-3 text-right">₹{stock.price.toLocaleString()}</div>
+                            <div className="col-span-2 text-right text-red-500">{stock.changePercent.toFixed(2)}%</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
           
           <TabsContent value="marketData">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -296,7 +484,6 @@ const Analysis = () => {
                   </div>
                 </div>
                 
-                {/* Market Indicators Panel */}
                 <div className="glass-panel p-5">
                   <h2 className="font-semibold mb-4">Market Indicators</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -347,81 +534,7 @@ const Analysis = () => {
               </div>
               
               <div className="space-y-6">
-                <div className="glass-panel p-5">
-                  <div className="flex items-center mb-4">
-                    <div className="mr-3 p-2 rounded-lg bg-primary/20">
-                      <Sparkles className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">AI Market Analysis</h2>
-                      <div className="flex items-center text-muted-foreground text-sm gap-2">
-                        <Clock3 className="h-3.5 w-3.5" />
-                        <span>Updated {timeframe === '1d' ? 'just now' : '3 hours ago'}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {isLoadingAI ? (
-                    <div className="h-48 flex items-center justify-center">
-                      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={cn(
-                          "px-3 py-1.5 rounded-lg flex items-center text-sm font-medium",
-                          aiAnalysis?.sentiment === 'bullish' ? "bg-success/20 text-success" :
-                          aiAnalysis?.sentiment === 'bearish' ? "bg-destructive/20 text-destructive" :
-                          "bg-warning/20 text-warning"
-                        )}>
-                          {aiAnalysis?.sentiment === 'bullish' ? (
-                            <TrendingUp className="h-4 w-4 mr-1.5" />
-                          ) : aiAnalysis?.sentiment === 'bearish' ? (
-                            <TrendingDown className="h-4 w-4 mr-1.5" />
-                          ) : (
-                            <Workflow className="h-4 w-4 mr-1.5" />
-                          )}
-                          <span className="capitalize">{aiAnalysis?.sentiment}</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Confidence: <span className="text-foreground font-medium">{(aiAnalysis?.confidence * 100).toFixed(0)}%</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-sm leading-relaxed">
-                        {aiAnalysis?.analysis}
-                      </p>
-                      
-                      <div className="pt-2">
-                        <h3 className="text-sm font-medium mb-2">Key Points</h3>
-                        <ul className="space-y-1.5">
-                          {aiAnalysis?.keyPoints.map((point, index) => (
-                            <li key={index} className="flex items-start text-sm">
-                              <span className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2.5 flex-shrink-0 mt-0.5">
-                                {index + 1}
-                              </span>
-                              <span>{point}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      {aiAnalysis?.recommendations && (
-                        <div className="pt-2">
-                          <h3 className="text-sm font-medium mb-2">Recommendations</h3>
-                          <ul className="space-y-1.5">
-                            {aiAnalysis.recommendations.map((rec, index) => (
-                              <li key={index} className="flex items-start text-sm">
-                                <span className="text-primary mr-2.5">•</span>
-                                <span>{rec}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <AiInsights type="market" timeframe={timeframe} />
                 
                 <div className="glass-panel p-5">
                   <h2 className="font-semibold mb-4">Market Calendar</h2>
@@ -463,7 +576,7 @@ const Analysis = () => {
             </div>
           </TabsContent>
           
-          <TabsContent value="strategy">
+          <TabsContent value="aiAnalysis">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <StrategySignals />
@@ -482,139 +595,9 @@ const Analysis = () => {
                 </Tabs>
                 
                 {analysisSectionActive === "market" ? (
-                  <div className="space-y-6">
-                    <div className="glass-panel p-5">
-                      <div className="flex items-center mb-4">
-                        <div className="mr-3 p-2 rounded-lg bg-primary/20">
-                          <Sparkles className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h2 className="text-lg font-semibold">AI Market Analysis</h2>
-                          <div className="flex items-center text-muted-foreground text-sm gap-2">
-                            <Clock3 className="h-3.5 w-3.5" />
-                            <span>Updated {timeframe === '1d' ? 'just now' : '3 hours ago'}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {isLoadingAI ? (
-                        <div className="h-48 flex items-center justify-center">
-                          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className={cn(
-                              "px-3 py-1.5 rounded-lg flex items-center text-sm font-medium",
-                              aiAnalysis?.sentiment === 'bullish' ? "bg-success/20 text-success" :
-                              aiAnalysis?.sentiment === 'bearish' ? "bg-destructive/20 text-destructive" :
-                              "bg-warning/20 text-warning"
-                            )}>
-                              {aiAnalysis?.sentiment === 'bullish' ? (
-                                <TrendingUp className="h-4 w-4 mr-1.5" />
-                              ) : aiAnalysis?.sentiment === 'bearish' ? (
-                                <TrendingDown className="h-4 w-4 mr-1.5" />
-                              ) : (
-                                <Workflow className="h-4 w-4 mr-1.5" />
-                              )}
-                              <span className="capitalize">{aiAnalysis?.sentiment}</span>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Confidence: <span className="text-foreground font-medium">{(aiAnalysis?.confidence * 100).toFixed(0)}%</span>
-                            </div>
-                          </div>
-                          
-                          <p className="text-sm leading-relaxed">
-                            {aiAnalysis?.analysis}
-                          </p>
-                          
-                          <div className="pt-2">
-                            <h3 className="text-sm font-medium mb-2">Key Points</h3>
-                            <ul className="space-y-1.5">
-                              {aiAnalysis?.keyPoints.map((point, index) => (
-                                <li key={index} className="flex items-start text-sm">
-                                  <span className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2.5 flex-shrink-0 mt-0.5">
-                                    {index + 1}
-                                  </span>
-                                  <span>{point}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          {aiAnalysis?.recommendations && (
-                            <div className="pt-2">
-                              <h3 className="text-sm font-medium mb-2">Recommendations</h3>
-                              <ul className="space-y-1.5">
-                                {aiAnalysis.recommendations.map((rec, index) => (
-                                  <li key={index} className="flex items-start text-sm">
-                                    <span className="text-primary mr-2.5">•</span>
-                                    <span>{rec}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <AiInsights type="market" timeframe={timeframe} />
                 ) : (
-                  <div className="space-y-6">
-                    <div className="glass-panel p-5">
-                      <div className="flex items-center mb-4">
-                        <div className="mr-3 p-2 rounded-lg bg-primary/20">
-                          <Sparkles className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h2 className="text-lg font-semibold">Strategy Performance</h2>
-                          <p className="text-muted-foreground text-sm">Analysis of your trading strategy</p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div className="bg-secondary/40 p-3 rounded-lg">
-                          <h3 className="text-sm font-medium mb-2">Performance Metrics</h3>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-background/60 p-2 rounded">
-                              <p className="text-xs text-muted-foreground">Win Rate</p>
-                              <p className="text-lg font-semibold">62%</p>
-                            </div>
-                            <div className="bg-background/60 p-2 rounded">
-                              <p className="text-xs text-muted-foreground">Avg Return</p>
-                              <p className="text-lg font-semibold">+4.8%</p>
-                            </div>
-                            <div className="bg-background/60 p-2 rounded">
-                              <p className="text-xs text-muted-foreground">Holding Period</p>
-                              <p className="text-lg font-semibold">14 days</p>
-                            </div>
-                            <div className="bg-background/60 p-2 rounded">
-                              <p className="text-xs text-muted-foreground">Max Drawdown</p>
-                              <p className="text-lg font-semibold">-6.2%</p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h3 className="text-sm font-medium mb-2">Improvement Suggestions</h3>
-                          <ul className="space-y-2">
-                            <li className="text-sm flex items-start">
-                              <span className="text-primary mr-2">•</span>
-                              <span>Add volume filters to avoid low liquidity stocks</span>
-                            </li>
-                            <li className="text-sm flex items-start">
-                              <span className="text-primary mr-2">•</span>
-                              <span>Consider tighter stop-loss during high volatility</span>
-                            </li>
-                            <li className="text-sm flex items-start">
-                              <span className="text-primary mr-2">•</span>
-                              <span>Implement sector exposure limits (max 20%)</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <AiInsights type="strategy" timeframe={timeframe} />
                 )}
               </div>
             </div>
