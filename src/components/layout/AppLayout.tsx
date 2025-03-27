@@ -1,9 +1,8 @@
 
 import { ReactNode } from "react";
-import { SidebarProvider, Sidebar, SidebarContent, SidebarRail, SidebarInset } from "@/components/ui/sidebar";
 import AppNavigation from "./AppNavigation";
-import AppTopbar from "./AppTopbar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -13,18 +12,15 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const isMobile = useIsMobile();
   
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex h-full pattern-rangoli">
-        <AppNavigation />
-        <SidebarInset className="flex flex-col h-full">
-          <AppTopbar />
-          <main className={`flex-1 h-full overflow-y-auto ${isMobile ? "pb-20" : "pb-8"} px-4 md:px-8 relative`}>
-            <SidebarRail className="hidden md:flex" />
-            {children}
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <div className="flex h-full pattern-rangoli">
+      <AppNavigation />
+      <main className={`flex-1 h-full overflow-y-auto ${isMobile ? "pb-20" : "pb-8"} px-4 md:px-8 relative`}>
+        <div className="absolute top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+        {children}
+      </main>
+    </div>
   );
 };
 
