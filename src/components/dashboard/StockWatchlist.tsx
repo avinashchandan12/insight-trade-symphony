@@ -81,7 +81,7 @@ const StockItem = ({ stock }: { stock: StockData }) => {
       
       <div className="flex items-center space-x-4">
         <div className="text-right">
-          <p className="font-semibold">${stock.price.toFixed(2)}</p>
+          <p className="font-semibold">₹{stock.price.toFixed(2)}</p>
           <div className={cn(
             "flex items-center justify-end text-xs",
             isPositive ? "text-success" : "text-destructive"

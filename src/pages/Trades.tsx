@@ -62,7 +62,7 @@ const Trades = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="glass-panel p-5">
             <p className="text-muted-foreground text-sm mb-1">Total Value</p>
-            <p className="text-2xl font-semibold">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-2xl font-semibold">₹{totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
           <div className="glass-panel p-5">
             <p className="text-muted-foreground text-sm mb-1">Open Positions</p>
@@ -88,7 +88,7 @@ const Trades = () => {
               "text-2xl font-semibold",
               profitLoss > 0 ? "text-success" : profitLoss < 0 ? "text-destructive" : ""
             )}>
-              {profitLoss > 0 ? "+" : ""}{profitLoss.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {profitLoss > 0 ? "+" : ""}₹{Math.abs(profitLoss).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
         </div>
@@ -210,10 +210,10 @@ const Trades = () => {
                           <span className="capitalize">{trade.type}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">${trade.price.toFixed(2)}</td>
+                      <td className="px-4 py-3">₹{trade.price.toFixed(2)}</td>
                       <td className="px-4 py-3">{trade.quantity}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">
-                        {new Date(trade.date).toLocaleDateString()}
+                        {new Date(trade.date).toLocaleDateString('en-IN')}
                       </td>
                       <td className="px-4 py-3">
                         <span className={cn(
@@ -225,13 +225,13 @@ const Trades = () => {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div>
-                          <p className="font-semibold">${(trade.price * trade.quantity).toFixed(2)}</p>
+                          <p className="font-semibold">₹{(trade.price * trade.quantity).toFixed(2)}</p>
                           {trade.status === 'closed' && trade.profitLoss !== undefined && (
                             <p className={cn(
                               "text-xs font-medium",
                               trade.profitLoss >= 0 ? "text-success" : "text-destructive"
                             )}>
-                              {trade.profitLoss >= 0 ? '+' : ''}{trade.profitLoss.toFixed(2)}
+                              {trade.profitLoss >= 0 ? '+' : ''}₹{Math.abs(trade.profitLoss).toFixed(2)}
                             </p>
                           )}
                         </div>

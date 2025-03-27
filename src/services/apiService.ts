@@ -1,4 +1,3 @@
-
 // This file would contain the actual API integration code
 // For now, we'll create mock implementations
 
@@ -48,32 +47,32 @@ export interface JournalEntry {
   tags: string[];
 }
 
-// Mock data
+// Mock data with Indian stocks
 const mockTrades: Trade[] = [
   {
     id: "1",
-    symbol: "AAPL",
+    symbol: "RELIANCE",
     type: "buy",
-    price: 180.45,
+    price: 2480.75,
     quantity: 10,
     date: "2023-09-15T14:30:00",
     status: "open"
   },
   {
     id: "2",
-    symbol: "MSFT",
+    symbol: "HDFCBANK",
     type: "sell",
-    price: 324.78,
+    price: 1645.30,
     quantity: 5,
     date: "2023-09-20T10:15:00",
-    profitLoss: 120.50,
+    profitLoss: 1205.50,
     status: "closed"
   },
   {
     id: "3",
-    symbol: "TSLA",
+    symbol: "TCS",
     type: "buy",
-    price: 210.30,
+    price: 3590.45,
     quantity: 8,
     date: "2023-10-05T11:45:00",
     status: "open"
@@ -81,17 +80,17 @@ const mockTrades: Trade[] = [
 ];
 
 const mockStockData: StockData[] = [
-  { symbol: "AAPL", name: "Apple Inc.", price: 182.52, change: 1.23, changePercent: 0.68 },
-  { symbol: "MSFT", name: "Microsoft Corp.", price: 328.79, change: -2.45, changePercent: -0.74 },
-  { symbol: "TSLA", name: "Tesla Inc.", price: 214.65, change: 8.30, changePercent: 4.02 },
-  { symbol: "GOOGL", name: "Alphabet Inc.", price: 132.87, change: 0.56, changePercent: 0.42 },
-  { symbol: "AMZN", name: "Amazon.com Inc.", price: 174.36, change: -1.89, changePercent: -1.07 }
+  { symbol: "RELIANCE", name: "Reliance Industries", price: 2487.25, change: 12.50, changePercent: 0.51 },
+  { symbol: "HDFCBANK", name: "HDFC Bank Ltd.", price: 1651.80, change: -8.75, changePercent: -0.53 },
+  { symbol: "TCS", name: "Tata Consultancy Services", price: 3598.60, change: 28.15, changePercent: 0.79 },
+  { symbol: "INFY", name: "Infosys Ltd.", price: 1532.45, change: 6.30, changePercent: 0.41 },
+  { symbol: "ICICIBANK", name: "ICICI Bank Ltd.", price: 954.20, change: -5.65, changePercent: -0.59 }
 ];
 
 const mockMarketSummary: MarketSummary[] = [
-  { indexName: "S&P 500", value: 4567.89, change: 12.54, changePercent: 0.28 },
-  { indexName: "Nasdaq", value: 14239.45, change: 45.87, changePercent: 0.32 },
-  { indexName: "Dow Jones", value: 35678.92, change: -89.54, changePercent: -0.25 }
+  { indexName: "NIFTY 50", value: 21456.70, change: 86.45, changePercent: 0.40 },
+  { indexName: "SENSEX", value: 71324.80, change: 245.60, changePercent: 0.35 },
+  { indexName: "NIFTY BANK", value: 46789.50, change: -125.30, changePercent: -0.27 }
 ];
 
 const mockStrategies: Strategy[] = [
