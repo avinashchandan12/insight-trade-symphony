@@ -1,242 +1,129 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/layout/AppLayout";
-import { fetchStrategies, Strategy } from "@/services/apiService";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowDownIcon, ArrowUpIcon, MousePointerSquareDashed, Plus, ShieldCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DiwaaliPatternIcon } from "@/assets/icons/IndianMarket";
 
-// Mock data for opportunities
-const oppData = [
-  {
-    symbol: "LT",
-    name: "Larsen & Toubro",
-    price: 2340.6,
-    change: -8.76,
-    opportunity: "buy",
-    reason: "Dropped by 10% in the past week"
-  },
-  {
-    symbol: "ICICI",
-    name: "ICICI Bank",
-    price: 1020.4,
-    change: -5.32,
-    opportunity: "buy",
-    reason: "RSI below 30 (oversold)"
-  },
-  {
-    symbol: "TCS",
-    name: "Tata Consultancy",
-    price: 3456.8,
-    change: 7.21,
-    opportunity: "sell",
-    reason: "Gained 7% from purchase price"
-  },
-  {
-    symbol: "WIPRO",
-    name: "Wipro Limited",
-    price: 432.5,
-    change: 10.45,
-    opportunity: "sell",
-    reason: "RSI above 70 (overbought)"
-  }
-];
-
-const Strategy = () => {
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
-  const [view, setView] = useState<'editor' | 'preview'>('preview');
-  
-  const { data: strategies = [], isLoading } = useQuery({
-    queryKey: ["strategies"],
-    queryFn: fetchStrategies
-  });
-  
-  const handleNewStrategy = () => {
-    // This would create a new strategy in a real app
-    console.log("Create new strategy");
-  };
-  
-  const selectStrategy = (strategy: Strategy) => {
-    setSelectedStrategy(strategy);
-  };
+// Renamed the component to StrategyPage to avoid conflicts
+const StrategyPage = () => {
+  const [activeTab, setActiveTab] = useState("market-overview");
   
   return (
     <AppLayout>
       <div className="py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-display font-bold mb-1">Strategy</h1>
             <p className="text-muted-foreground">Create and manage your trading strategies</p>
           </div>
-          <Button onClick={handleNewStrategy}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Strategy
-          </Button>
+          <div className="hidden md:block absolute top-16 right-16 opacity-5">
+            <DiwaaliPatternIcon className="w-40 h-40 text-primary" />
+          </div>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="space-y-6">
-            <div className="glass-panel p-5">
-              <h2 className="text-lg font-semibold mb-4">My Strategies</h2>
-              <p className="text-sm text-muted-foreground mb-4">Select a strategy to edit or view</p>
+          <div className="lg:col-span-2 space-y-6">
+            <Tabs defaultValue="market-overview" className="w-full">
+              <TabsList className="grid grid-cols-3 mb-6">
+                <TabsTrigger value="market-overview">Market Overview</TabsTrigger>
+                <TabsTrigger value="my-strategies">My Strategies</TabsTrigger>
+                <TabsTrigger value="backtesting">Backtesting</TabsTrigger>
+              </TabsList>
               
-              {isLoading ? (
-                <div className="h-32 flex items-center justify-center">
-                  <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {strategies.map((strategy) => (
-                    <div
-                      key={strategy.id}
-                      className={cn(
-                        "p-3 rounded-lg cursor-pointer transition-colors",
-                        selectedStrategy?.id === strategy.id
-                          ? "bg-primary/20 hover:bg-primary/25"
-                          : "hover:bg-secondary/40"
-                      )}
-                      onClick={() => selectStrategy(strategy)}
-                    >
-                      <h3 className="font-medium">{strategy.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{strategy.description}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="glass-panel p-5">
-              <h2 className="text-lg font-semibold mb-4">Market Opportunities</h2>
-              <p className="text-sm text-muted-foreground mb-4">Potential trades based on your strategies</p>
+              <TabsContent value="market-overview" className="space-y-6">
+                <MarketMovers />
+                <TrendingStocks />
+              </TabsContent>
               
-              <div className="flex gap-2 mb-4">
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full bg-secondary/40 text-primary"
-                >
-                  Buy Signals
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full bg-secondary/40 text-muted-foreground"
-                >
-                  Sell Signals
-                </Button>
-              </div>
-              
-              <div className="space-y-3">
-                {oppData.map((opp, index) => (
-                  <div key={index} className="bg-secondary/40 p-3 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-lg bg-secondary/80 flex items-center justify-center mr-3">
-                          <span className="font-semibold text-sm">{opp.symbol}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{opp.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">{opp.reason}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-mono font-semibold">₹{opp.price.toLocaleString()}</p>
-                        <div className={cn(
-                          "flex items-center justify-end text-xs mt-0.5",
-                          opp.change >= 0 ? "text-success" : "text-destructive"
-                        )}>
-                          {opp.change >= 0 ? (
-                            <ArrowUpIcon className="h-3 w-3 mr-1" />
-                          ) : (
-                            <ArrowDownIcon className="h-3 w-3 mr-1" />
-                          )}
-                          <span>{Math.abs(opp.change).toFixed(2)}% (weekly)</span>
-                        </div>
-                      </div>
-                    </div>
+              <TabsContent value="my-strategies" className="space-y-6">
+                <Card className="p-5 glass-panel">
+                  <h2 className="text-xl font-semibold mb-4">My Trading Strategies</h2>
+                  <p className="text-muted-foreground mb-6">Create, edit, and test your trading strategies</p>
+                  
+                  <div className="space-y-4">
+                    <StrategyCard 
+                      name="MACD Crossover" 
+                      description="Buy when MACD crosses above signal line, sell when it crosses below" 
+                      winRate={68} 
+                      tags={["Technical", "Momentum"]}
+                    />
+                    
+                    <StrategyCard 
+                      name="Nifty Swing Trade" 
+                      description="Buy Nifty on support levels with positive momentum indicators" 
+                      winRate={72} 
+                      tags={["Index", "Swing"]}
+                    />
+                    
+                    <StrategyCard 
+                      name="Gap & Go" 
+                      description="Buy stocks that gap up on high volume and momentum" 
+                      winRate={65} 
+                      tags={["Momentum", "Intraday"]}
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
+                  
+                  <Button className="w-full mt-6">
+                    Create New Strategy
+                  </Button>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="backtesting" className="space-y-6">
+                <Card className="p-5 glass-panel">
+                  <h2 className="text-xl font-semibold mb-4">Backtest Your Strategies</h2>
+                  <p className="text-muted-foreground mb-6">Test your trading strategies against historical data</p>
+                  
+                  {/* Backtest content would go here */}
+                  <div className="rounded-lg border border-border/40 p-8 text-center">
+                    <h3 className="font-medium mb-2">Select a strategy to backtest</h3>
+                    <p className="text-muted-foreground text-sm">Choose from your saved strategies or create a new one</p>
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
           
-          <div className="lg:col-span-2">
-            {selectedStrategy ? (
-              <div className="glass-panel p-5">
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h2 className="text-xl font-semibold">{selectedStrategy.name}</h2>
-                    <p className="text-muted-foreground">{selectedStrategy.description}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant={view === 'editor' ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setView('editor')}
-                      className={view !== 'editor' ? "bg-secondary/40" : ""}
-                    >
-                      Editor
-                    </Button>
-                    <Button 
-                      variant={view === 'preview' ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setView('preview')}
-                      className={view !== 'preview' ? "bg-secondary/40" : ""}
-                    >
-                      Preview
-                    </Button>
-                  </div>
-                </div>
+          <div className="space-y-6">
+            <Card className="p-5 glass-panel">
+              <h2 className="text-xl font-semibold mb-4">Quick Insights</h2>
+              <div className="space-y-4">
+                <InsightCard 
+                  title="Market Sentiment" 
+                  value="Bullish" 
+                  description="Nifty up 1.2% this week" 
+                  trend="up"
+                />
                 
-                {view === 'preview' ? (
-                  <div className="bg-secondary/40 rounded-lg p-5 font-mono text-sm whitespace-pre-wrap overflow-auto">
-                    {selectedStrategy.rules}
-                  </div>
-                ) : (
-                  <textarea
-                    className="w-full h-96 bg-secondary/40 rounded-lg p-4 font-mono text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary"
-                    value={selectedStrategy.rules}
-                    onChange={() => {}}
-                  />
-                )}
+                <InsightCard 
+                  title="Volatility" 
+                  value="Moderate" 
+                  description="India VIX at 14.3" 
+                  trend="neutral"
+                />
                 
-                <div className="mt-6 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    Created on {new Date(selectedStrategy.created).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="bg-secondary/40">
-                      <MousePointerSquareDashed className="mr-2 h-4 w-4" />
-                      Backtest
-                    </Button>
-                    <Button>
-                      <ShieldCheck className="mr-2 h-4 w-4" />
-                      Save
-                    </Button>
-                  </div>
-                </div>
+                <InsightCard 
+                  title="Foreign Inflows" 
+                  value="Positive" 
+                  description="FIIs net buyers for 3 days" 
+                  trend="up"
+                />
               </div>
-            ) : (
-              <div className="glass-panel flex items-center justify-center p-10 h-72">
-                <div className="text-center">
-                  <ShieldCheck className="h-10 w-10 text-muted-foreground mb-4 mx-auto" />
-                  <h3 className="text-lg font-medium mb-2">No Strategy Selected</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Select a strategy from the list or create a new one
-                  </p>
-                  <Button onClick={handleNewStrategy}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Strategy
-                  </Button>
-                </div>
+            </Card>
+            
+            <Card className="p-5 glass-panel">
+              <h2 className="text-xl font-semibold mb-4">Sector Performance</h2>
+              <div className="space-y-2">
+                <SectorItem name="IT" change={2.3} />
+                <SectorItem name="Banking" change={1.7} />
+                <SectorItem name="Pharma" change={-0.8} />
+                <SectorItem name="Auto" change={0.5} />
+                <SectorItem name="FMCG" change={-0.3} />
               </div>
-            )}
+            </Card>
           </div>
         </div>
       </div>
@@ -244,4 +131,105 @@ const Strategy = () => {
   );
 };
 
-export default Strategy;
+const MarketMovers = () => (
+  <Card className="p-5 glass-panel">
+    <h2 className="text-xl font-semibold mb-4">Market Movers</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-3">
+        <h3 className="font-medium text-destructive">Top Losers (Weekly)</h3>
+        <div className="space-y-2">
+          <StockItem name="HDFCBANK" change={-8.5} price="1,525.60" />
+          <StockItem name="TATASTEEL" change={-7.2} price="134.80" />
+          <StockItem name="AXISBANK" change={-6.3} price="975.30" />
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <h3 className="font-medium text-success">Top Gainers (Weekly)</h3>
+        <div className="space-y-2">
+          <StockItem name="INFY" change={10.2} price="1,840.50" />
+          <StockItem name="RELIANCE" change={8.7} price="2,980.75" />
+          <StockItem name="TCS" change={7.1} price="3,560.25" />
+        </div>
+      </div>
+    </div>
+  </Card>
+);
+
+const TrendingStocks = () => (
+  <Card className="p-5 glass-panel">
+    <h2 className="text-xl font-semibold mb-4">Trending Stocks</h2>
+    <div className="space-y-3">
+      <StockItem name="BHARTIARTL" change={3.5} price="1,125.40" volume="High" />
+      <StockItem name="ICICIBANK" change={2.8} price="1,030.75" volume="High" />
+      <StockItem name="SBIN" change={1.9} price="780.30" volume="Medium" />
+      <StockItem name="LT" change={4.2} price="2,970.60" volume="High" />
+      <StockItem name="WIPRO" change={-2.1} price="450.80" volume="Medium" />
+    </div>
+  </Card>
+);
+
+const StockItem = ({ name, change, price, volume }: { name: string, change: number, price: string, volume?: string }) => (
+  <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/40">
+    <div>
+      <h4 className="font-medium">{name}</h4>
+      <p className="text-xs text-muted-foreground">₹{price}</p>
+    </div>
+    <div className="flex items-center">
+      {volume && (
+        <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded mr-2">
+          {volume}
+        </span>
+      )}
+      <span className={`text-sm font-medium ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
+        {change >= 0 ? '+' : ''}{change}%
+      </span>
+    </div>
+  </div>
+);
+
+const StrategyCard = ({ name, description, winRate, tags }: { name: string, description: string, winRate: number, tags: string[] }) => (
+  <div className="border border-border/40 rounded-lg p-4 hover:bg-secondary/30 transition-colors">
+    <div className="flex justify-between items-start mb-2">
+      <h3 className="font-medium">{name}</h3>
+      <span className={`text-sm font-medium ${winRate >= 70 ? 'text-success' : winRate >= 60 ? 'text-accent' : 'text-muted-foreground'}`}>
+        {winRate}% Win
+      </span>
+    </div>
+    <p className="text-sm text-muted-foreground mb-3">{description}</p>
+    <div className="flex flex-wrap gap-2">
+      {tags.map(tag => (
+        <Badge key={tag} variant="outline" className="text-xs bg-secondary/40">
+          {tag}
+        </Badge>
+      ))}
+    </div>
+  </div>
+);
+
+const InsightCard = ({ title, value, description, trend }: { title: string, value: string, description: string, trend: 'up' | 'down' | 'neutral' }) => (
+  <div className="border border-border/40 rounded-lg p-3">
+    <div className="flex justify-between items-center">
+      <h3 className="text-sm font-medium">{title}</h3>
+      <span className={`text-xs px-2 py-0.5 rounded ${
+        trend === 'up' ? 'bg-success/20 text-success' : 
+        trend === 'down' ? 'bg-destructive/20 text-destructive' : 
+        'bg-accent/20 text-accent'
+      }`}>
+        {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'} {value}
+      </span>
+    </div>
+    <p className="text-xs text-muted-foreground mt-1">{description}</p>
+  </div>
+);
+
+const SectorItem = ({ name, change }: { name: string, change: number }) => (
+  <div className="flex items-center justify-between p-2 rounded bg-secondary/40">
+    <span className="font-medium">{name}</span>
+    <span className={`text-sm font-medium ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
+      {change >= 0 ? '+' : ''}{change}%
+    </span>
+  </div>
+);
+
+export default StrategyPage;

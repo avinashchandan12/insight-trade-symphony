@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { BarChart3, BookText, Home, LineChart, Settings, ChevronRight, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { IndianMarketIcon } from "@/assets/icons/IndianMarket";
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: Home },
@@ -57,12 +58,12 @@ const AppNavigation = () => {
 
 const Logo = () => (
   <div className="flex items-center">
-    <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center mr-3">
-      <div className="w-5 h-5 rounded-sm bg-primary/90" />
+    <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center mr-3">
+      <IndianMarketIcon className="w-5 h-5 text-white" />
     </div>
     <div>
       <h1 className="font-display font-semibold tracking-tight text-lg">TradeInsight</h1>
-      <p className="text-muted-foreground text-xs">AI Trading Companion</p>
+      <p className="text-muted-foreground text-xs">Indian Markets AI</p>
     </div>
   </div>
 );
@@ -94,7 +95,7 @@ const MobileNavItem = ({ name, path, icon: Icon, isActive }: { name: string, pat
       <div 
         className={cn(
           "p-1.5 rounded-lg transition-colors mb-1", 
-          isActive ? "bg-primary/20 text-primary" : "text-muted-foreground"
+          isActive ? "gradient-primary text-white" : "text-muted-foreground"
         )}
       >
         <Icon className="h-5 w-5" />

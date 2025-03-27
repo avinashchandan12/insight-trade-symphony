@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DiwaaliPatternIcon, IndianMarketIcon } from "@/assets/icons/IndianMarket";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const Welcome = () => {
   const [loading, setLoading] = useState(true);
@@ -41,13 +43,21 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden p-6">
-      {/* Background gradient effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10 z-0" />
+    <div className="min-h-screen flex flex-col items-center justify-center pattern-rangoli relative overflow-hidden p-6">
+      {/* Theme toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
       
-      {/* Animated dots */}
+      {/* Background elements */}
       <div className="absolute inset-0 z-0 opacity-30">
-        {Array.from({ length: 100 }).map((_, i) => (
+        <div className="absolute top-1/4 right-1/4 transform -translate-y-1/2 translate-x-1/2">
+          <DiwaaliPatternIcon className="w-60 h-60 text-primary opacity-20" />
+        </div>
+        <div className="absolute bottom-1/4 left-1/4 transform translate-y-1/2 -translate-x-1/2">
+          <DiwaaliPatternIcon className="w-40 h-40 text-accent opacity-20" />
+        </div>
+        {Array.from({ length: 50 }).map((_, i) => (
           <div 
             key={i}
             className="absolute rounded-full bg-primary/30"
@@ -67,25 +77,31 @@ const Welcome = () => {
         {showContent && (
           <div className="animate-slide-down">
             <div className="mb-8 flex justify-center">
-              <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-                <div className="h-8 w-8 rounded-lg bg-primary" />
+              <div className="h-20 w-20 rounded-2xl gradient-primary flex items-center justify-center">
+                <IndianMarketIcon className="h-10 w-10 text-white" />
               </div>
             </div>
             
             <h1 className="text-4xl font-display font-bold tracking-tight mb-2 text-gradient">
               TradeInsight AI
             </h1>
-            <p className="text-muted-foreground text-lg max-w-sm mx-auto mb-8">
-              Your intelligent trading companion powered by advanced analytics and AI
+            <p className="text-muted-foreground text-lg max-w-sm mx-auto mb-4">
+              Your intelligent trading companion for Indian markets
             </p>
+            <div className="flex justify-center gap-2 mb-8">
+              <Badge text="NSE" />
+              <Badge text="BSE" />
+              <Badge text="F&O" />
+              <Badge text="Commodities" />
+            </div>
           </div>
         )}
         
         {loading ? (
-          <div className="animate-fade-in">
+          <div className="animate-fade-in glass-panel p-8 rounded-2xl">
             <div className="h-1.5 bg-secondary rounded-full w-full max-w-xs mx-auto mb-4 overflow-hidden">
               <div 
-                className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
+                className="h-full gradient-primary rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -100,7 +116,7 @@ const Welcome = () => {
           <div className="animate-scale-in">
             <Button 
               onClick={handleEnter} 
-              className="px-8 py-6 rounded-xl text-lg font-medium transition-all duration-300 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="px-8 py-6 rounded-xl text-lg font-medium transition-all duration-300 gradient-primary hover:opacity-90 text-white"
             >
               Enter Dashboard
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -111,5 +127,11 @@ const Welcome = () => {
     </div>
   );
 };
+
+const Badge = ({ text }: { text: string }) => (
+  <span className="px-3 py-1 text-xs font-medium rounded-full bg-secondary/70 text-foreground">
+    {text}
+  </span>
+);
 
 export default Welcome;

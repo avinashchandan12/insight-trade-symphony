@@ -2,6 +2,7 @@
 import { ReactNode } from "react";
 import AppNavigation from "./AppNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -11,9 +12,12 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="flex h-full">
+    <div className="flex h-full pattern-rangoli">
       <AppNavigation />
-      <main className={`flex-1 h-full overflow-y-auto ${isMobile ? "pb-20" : "pb-8"} px-4 md:px-8`}>
+      <main className={`flex-1 h-full overflow-y-auto ${isMobile ? "pb-20" : "pb-8"} px-4 md:px-8 relative`}>
+        <div className="absolute top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
         {children}
       </main>
     </div>
