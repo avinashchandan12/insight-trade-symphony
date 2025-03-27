@@ -1,9 +1,26 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, BookText, Home, LineChart, Settings, ChevronRight, ShieldCheck } from "lucide-react";
+import { 
+  BarChart3, 
+  BookText, 
+  Home, 
+  LineChart, 
+  Settings, 
+  ChevronRight, 
+  ShieldCheck
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { IndianMarketIcon } from "@/assets/icons/IndianMarket";
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader, 
+  SidebarMenu, 
+  SidebarMenuItem, 
+  SidebarMenuButton,
+  useSidebar
+} from "@/components/ui/sidebar";
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: Home },
@@ -17,6 +34,7 @@ const navItems = [
 const AppNavigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { state } = useSidebar();
   
   if (isMobile) {
     return (
@@ -37,54 +55,45 @@ const AppNavigation = () => {
   }
   
   return (
-    <nav className="w-64 h-full bg-sidebar border-r border-border/50 p-4 hidden md:block">
-      <div className="flex items-center justify-between mb-8 px-2">
-        <Logo />
-      </div>
-      <div className="space-y-1">
-        {navItems.map((item) => (
-          <DesktopNavItem 
-            key={item.path}
-            name={item.name}
-            path={item.path}
-            icon={item.icon}
-            isActive={location.pathname === item.path}
-          />
-        ))}
-      </div>
-    </nav>
+    <Sidebar>
+      <SidebarHeader className="py-4">
+        <Logo collapsed={state === "collapsed"} />
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          {navItems.map((item) => (
+            <SidebarMenuItem key={item.path}>
+              <SidebarMenuButton
+                asChild
+                isActive={location.pathname === item.path}
+                tooltip={item.name}
+              >
+                <Link to={item.path}>
+                  <item.icon />
+                  <span>{item.name}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
-const Logo = () => (
-  <div className="flex items-center">
+const Logo = ({ collapsed }: { collapsed: boolean }) => (
+  <div className="flex items-center px-2">
     <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center mr-3">
       <IndianMarketIcon className="w-5 h-5 text-white" />
     </div>
-    <div>
-      <h1 className="font-display font-semibold tracking-tight text-lg">TradeInsight</h1>
-      <p className="text-muted-foreground text-xs">Indian Markets AI</p>
-    </div>
+    {!collapsed && (
+      <div>
+        <h1 className="font-display font-semibold tracking-tight text-lg">TradeInsight</h1>
+        <p className="text-muted-foreground text-xs">Indian Markets AI</p>
+      </div>
+    )}
   </div>
 );
-
-const DesktopNavItem = ({ name, path, icon: Icon, isActive }: { name: string, path: string, icon: any, isActive: boolean }) => {
-  return (
-    <Link
-      to={path}
-      className={cn(
-        "flex items-center px-3 py-2.5 rounded-lg transition-colors",
-        isActive 
-          ? "bg-primary/20 text-primary font-medium" 
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
-      )}
-    >
-      <Icon className="h-5 w-5 mr-3" />
-      <span>{name}</span>
-      {isActive && <ChevronRight className="h-4 w-4 ml-auto" />}
-    </Link>
-  );
-};
 
 const MobileNavItem = ({ name, path, icon: Icon, isActive }: { name: string, path: string, icon: any, isActive: boolean }) => {
   return (
