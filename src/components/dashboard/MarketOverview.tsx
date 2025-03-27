@@ -2,9 +2,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { MarketSummary } from "@/services/apiService";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { ArrowUpIcon, ArrowDownIcon, MoreVertical } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, MoreVertical, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRef, useEffect } from "react";
 
 // Mock data for the chart
 const chartData = [
@@ -25,6 +27,8 @@ const chartData = [
 ];
 
 const MarketOverview = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
   const { data: marketData, isLoading } = useQuery({
     queryKey: ["marketSummary"],
     queryFn: async () => {
@@ -48,6 +52,35 @@ const MarketOverview = () => {
     }
   });
 
+  // Auto-scroll effect for ticker at the bottom
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    
+    const scrollContainer = scrollRef.current;
+    let scrollAmount = 0;
+    const speed = 0.5; // pixels per frame
+    
+    const scroll = () => {
+      if (!scrollContainer) return;
+      
+      scrollAmount += speed;
+      scrollContainer.scrollLeft = scrollAmount;
+      
+      // Reset scroll when it reaches the end
+      if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+        scrollAmount = 0;
+      }
+      
+      requestAnimationFrame(scroll);
+    };
+    
+    const animationId = requestAnimationFrame(scroll);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [marketData]);
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -63,7 +96,10 @@ const MarketOverview = () => {
   return (
     <div className="glass-panel dark:bg-[#111418] p-5">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Market Overview</h2>
+        <div className="flex items-center gap-2">
+          <BarChart2 className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-semibold">Market Overview</h2>
+        </div>
         <button className="icon-button">
           <MoreVertical className="h-5 w-5 text-muted-foreground" />
         </button>
@@ -122,24 +158,26 @@ const MarketOverview = () => {
             </ChartContainer>
           </div>
           
-          <div className="flex flex-wrap gap-4 justify-between mt-6 pt-4 border-t border-border/30 overflow-x-auto">
-            {marketData?.map((item: MarketSummary) => (
-              <div key={item.indexName} className="flex items-center gap-2">
-                <span className={cn(
-                  "text-sm font-medium",
-                  item.changePercent >= 0 ? "text-success" : "text-destructive"
-                )}>
-                  {item.indexName}
-                </span>
-                <span className="text-sm font-mono">{item.value.toLocaleString()}</span>
-                <span className={cn(
-                  "text-xs font-medium",
-                  item.changePercent >= 0 ? "text-success" : "text-destructive"
-                )}>
-                  {item.changePercent >= 0 ? "+" : ""}{item.changePercent.toFixed(2)}%
-                </span>
-              </div>
-            ))}
+          <div className="mt-6 pt-4 border-t border-border/30">
+            <div 
+              ref={scrollRef}
+              className="flex gap-4 py-2 overflow-hidden whitespace-nowrap"
+              style={{ scrollBehavior: 'smooth' }}
+            >
+              {/* Double the tickers for seamless scrolling */}
+              {[...marketData, ...marketData, ...marketData]?.map((item: MarketSummary, index) => (
+                <div key={`${item.indexName}-${index}`} className="inline-flex items-center gap-2 pl-4 first:pl-0">
+                  <span className="font-medium whitespace-nowrap">{item.indexName}</span>
+                  <span className="font-mono whitespace-nowrap">{item.value.toLocaleString()}</span>
+                  <span className={cn(
+                    "text-xs font-medium whitespace-nowrap",
+                    item.changePercent >= 0 ? "text-success" : "text-destructive"
+                  )}>
+                    {item.changePercent >= 0 ? "+" : ""}{item.changePercent.toFixed(2)}%
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -151,7 +189,7 @@ const MarketCard = ({ marketData }: { marketData: MarketSummary }) => {
   const isPositive = marketData.changePercent >= 0;
   
   return (
-    <div className="bg-secondary/30 dark:bg-[#18191E] rounded-lg p-4 backdrop-blur-sm">
+    <div className="bg-secondary/30 dark:bg-[#18191E] rounded-lg p-4 backdrop-blur-sm border border-border/20">
       <h3 className="text-sm font-medium text-muted-foreground mb-2">{marketData.indexName}</h3>
       <p className="text-2xl font-mono font-semibold">{marketData.value.toLocaleString()}</p>
       <div className="flex items-center mt-2">

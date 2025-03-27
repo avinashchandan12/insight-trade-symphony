@@ -18,22 +18,31 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/layout/Logo";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, BookText, Home, LineChart, Settings, ShieldCheck, ListChecks, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+
+// Import custom SVG icons for better aesthetic
+import DashboardIcon from "@/components/icons/DashboardIcon";
+import WatchlistIcon from "@/components/icons/WatchlistIcon";
+import TradesIcon from "@/components/icons/TradesIcon";
+import AnalysisIcon from "@/components/icons/AnalysisIcon";
+import StrategyIcon from "@/components/icons/StrategyIcon";
+import JournalIcon from "@/components/icons/JournalIcon";
+import SettingsIcon from "@/components/icons/SettingsIcon";
+import UserIcon from "@/components/icons/UserIcon";
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
 const navItems = [
-  { name: "Dashboard", path: "/", icon: Home },
-  { name: "Watchlist", path: "/watchlist", icon: ListChecks },
-  { name: "Trades", path: "/trades", icon: BarChart3 },
-  { name: "Analysis", path: "/analysis", icon: LineChart },
-  { name: "Strategy", path: "/strategy", icon: ShieldCheck },
-  { name: "Journal", path: "/journal", icon: BookText },
-  { name: "Settings", path: "/settings", icon: Settings },
+  { name: "Dashboard", path: "/", icon: DashboardIcon },
+  { name: "Watchlist", path: "/watchlist", icon: WatchlistIcon },
+  { name: "Trades", path: "/trades", icon: TradesIcon },
+  { name: "Analysis", path: "/analysis", icon: AnalysisIcon },
+  { name: "Strategy", path: "/strategy", icon: StrategyIcon },
+  { name: "Journal", path: "/journal", icon: JournalIcon },
+  { name: "Settings", path: "/settings", icon: SettingsIcon },
 ];
 
 const AppLayout = ({ children }: AppLayoutProps) => {
@@ -49,7 +58,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
             <ThemeToggle />
             <Button variant="ghost" size="icon" asChild>
               <Link to="/auth">
-                <User className="h-4 w-4" />
+                <UserIcon className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -113,6 +122,7 @@ const DesktopSidebar = () => {
                     isActive={location.pathname === item.path}
                     tooltip={item.name}
                     asChild
+                    className="transition-all hover:bg-primary/10 dark:hover:bg-primary/20"
                   >
                     <Link to={item.path}>
                       <item.icon className="h-5 w-5" />
